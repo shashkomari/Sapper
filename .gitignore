@@ -1,1 +1,6 @@
 Debug/
+.vs/
+Sapper.sln
+Sapper.vcxproj
+Sapper.vcxproj.filters
+Sapper.vcxproj.user
