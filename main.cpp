@@ -9,7 +9,9 @@ protected:
     const int number_of_mines = 10;
     char** playing_field = new char* [size_x];
     char** mines_field = new char* [size_x];
-    char sym = '#';
+    char sym_under_the_cursor = '#';
+    char bomb_sym = '*';
+    char empty_sym = '.';
 
 public:
     Field() {
@@ -37,14 +39,100 @@ public:
     }
 
     void MapGeneration() {
+        // Generate bombs
         for (int mines = number_of_mines; mines > 0;) {
             int x = rand() % 10;
             int y = rand() % 10;
-            if (mines_field[x][y] != '*') {
-                mines_field[x][y] = '*';
+            if (mines_field[x][y] != bomb_sym) {
+                mines_field[x][y] = bomb_sym;
                 mines--;
             }
         }
+
+        // Generate numbers
+        for (int i = 0; i < size_x; i++)
+        {
+            for (int j = 0; j < size_y; j++)
+            {
+                if (mines_field[i][j] != bomb_sym)
+                {
+                    int num_of_bombs = BombCounter(i, j);
+                    if (num_of_bombs == 0) {
+                        mines_field[i][j] = empty_sym;
+                    }
+                    else
+                    {
+                        mines_field[i][j] = IntToChar(num_of_bombs);
+                    }
+                }
+            }
+        }
+    }
+
+    char IntToChar(int num) {
+        return (char) (num + 48);
+    }
+
+    int CharToInt(char ch) {
+
+    }
+
+    int BombCounter(int i, int j) {
+        int num_of_bombs = 0;
+        if (i > 0)
+        {
+            if (j > 0)
+            {
+                if (mines_field[i - 1][j - 1] == bomb_sym)
+                {
+                    num_of_bombs++;
+                }
+            }
+            if (mines_field[i - 1][j] == bomb_sym)
+            {
+                num_of_bombs++;
+            }
+            if (j < (size_y - 1))
+            {
+                if (mines_field[i - 1][j + 1] == bomb_sym)
+                {
+                    num_of_bombs++;
+                }
+            }
+        }
+        if (i < (size_x - 1))
+        {
+            if (j > 0)
+            {
+                if (mines_field[i + 1][j - 1] == bomb_sym)
+                {
+                    num_of_bombs++;
+                }
+            }
+            if (mines_field[i + 1][j] == bomb_sym)
+            {
+                num_of_bombs++;
+            }
+            if (j < (size_y - 1))
+            {
+                if (mines_field[i + 1][j + 1] == bomb_sym)
+                {
+                    num_of_bombs++;
+                }
+            }
+        }
+        if (j > 0)
+        {
+            if (mines_field[i][j - 1] == bomb_sym) {
+                num_of_bombs++;
+            }
+        }
+        if (j < (size_y - 1)) {
+            if (mines_field[i][j + 1] == bomb_sym) {
+                num_of_bombs++;
+            }
+        }
+        return num_of_bombs;
     }
 
     void EmptyField(char** arr) {
@@ -71,11 +159,11 @@ public:
     }
 
     void SetSym(int x, int y) {
-        playing_field[x][y] = sym;
+        playing_field[x][y] = sym_under_the_cursor;
     }
     
     void GetSym(int x, int y) {
-        sym = playing_field[x][y];
+        sym_under_the_cursor = playing_field[x][y];
     }
 };
 
