@@ -7,11 +7,11 @@ class Field {
 protected:
     const int size_x = 10, size_y = 10;
     const int number_of_mines = 10;
+    const char bomb_sym = '*';
+    const char empty_sym = '.';
+    char sym_under_the_cursor = '#';
     char** playing_field = new char* [size_x];
     char** mines_field = new char* [size_x];
-    char sym_under_the_cursor = '#';
-    char bomb_sym = '*';
-    char empty_sym = '.';
 
 public:
     Field() {
@@ -56,7 +56,7 @@ public:
             {
                 if (mines_field[i][j] != bomb_sym)
                 {
-                    int num_of_bombs = BombCounter(i, j);
+                    int num_of_bombs = CalculateBomb(i, j);
                     if (num_of_bombs == 0) {
                         mines_field[i][j] = empty_sym;
                     }
@@ -77,7 +77,7 @@ public:
 
     }
 
-    int BombCounter(int i, int j) {
+    int CalculateBomb(int i, int j) {
         int num_of_bombs = 0;
         if (i > 0)
         {
@@ -147,7 +147,7 @@ public:
         system("cls");
         for (int i = 0; i < size_x; i++) {
             for (int j = 0; j < size_y; j++) {
-                cout << mines_field[i][j] << ' ';
+                cout << playing_field[i][j] << ' ';
             }
             cout << endl;
         }
@@ -165,9 +165,71 @@ public:
     void GetSym(int x, int y) {
         sym_under_the_cursor = playing_field[x][y];
     }
+
+    void OpenCell(int x, int y) {
+        if (playing_field[x][y] == sym_under_the_cursor) {
+            playing_field[x][y] = mines_field[x][y];
+            if (playing_field[x][y] == empty_sym) {
+                CheckOnEmptyCell(x, y);
+            }
+        }
+    }
+
+    void CheckOnEmptyCell(int x, int y) {
+            if (x > 0 && playing_field[x - 1][y] == sym_under_the_cursor) {
+                OpenCell(x - 1, y);
+                if (mines_field[x - 1][y] == empty_sym) {
+                    CheckOnEmptyCell(x - 1, y);
+                }
+            }
+            if (x > 0 && y > 0 && playing_field[x - 1][y - 1] == sym_under_the_cursor) {
+                OpenCell(x - 1, y - 1);
+                if (mines_field[x - 1][y - 1] == empty_sym) {
+                    CheckOnEmptyCell(x - 1, y - 1);
+                }
+            }
+            if (x > 0 && (y+1) < size_y && playing_field[x - 1][y + 1] == sym_under_the_cursor) {
+                OpenCell(x - 1, y + 1);
+                if (mines_field[x - 1][y + 1] == empty_sym) {
+                    CheckOnEmptyCell(x - 1, y + 1);
+                }
+            }
+
+            ///////////////////////////////
+            if (y > 0 && playing_field[x][y - 1] == sym_under_the_cursor) {
+                OpenCell(x, y - 1);
+                if (mines_field[x][y - 1] == empty_sym) {
+                    CheckOnEmptyCell(x, y - 1);
+                }
+            }
+            if ((y + 1) < size_y && playing_field[x][y + 1] == sym_under_the_cursor) {
+                OpenCell(x, y + 1);
+                if (mines_field[x][y + 1] == empty_sym) {
+                    CheckOnEmptyCell(x, y + 1);
+                }
+            }
+
+            //////////////////////
+            if ((x + 1) < size_x && playing_field[x + 1][y] == sym_under_the_cursor) {
+                OpenCell(x + 1, y);
+                if (mines_field[x + 1][y] == empty_sym) {
+                    CheckOnEmptyCell(x + 1, y);
+                }
+            }
+            if ((x + 1) < size_x && y > 0 && playing_field[x + 1][y - 1] == sym_under_the_cursor) {
+                OpenCell(x + 1, y - 1);
+                if (mines_field[x + 1][y - 1] == empty_sym) {
+                    CheckOnEmptyCell(x + 1, y - 1);
+                }
+            }
+            if ((x + 1) < size_x && (y + 1) < size_y && playing_field[x + 1][y + 1] == sym_under_the_cursor) {
+                OpenCell(x + 1, y + 1);
+                if (mines_field[x + 1][y + 1] == empty_sym) {
+                    CheckOnEmptyCell(x + 1, y + 1);
+                }
+            }
+        }
 };
-
-
 
 class Cursor: public Field {
 private:
@@ -239,8 +301,10 @@ int main()
             case (80):
                 cursor.Down();
                 break;
-        default:
-            break;
+
+            case (13):
+                a.OpenCell(cursor.Update('x'), cursor.Update('y'));
+                break;
         }
         a.GetSym(cursor.Update('x'), cursor.Update('y'));
         a.ChangeCursorPlace(cursor.Update('x'), cursor.Update('y'));
