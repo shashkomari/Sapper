@@ -7,9 +7,9 @@ class Field {
 protected:
 	const int size_x = 10, size_y = 10;
 	const int number_of_mines = 10;
-	const char closed_sym = '#';
+	const char closed_sym = '.';
 	const char bomb_sym = '*';
-	const char empty_sym = '.';
+	const char empty_sym = ' ';
 	char sym_under_the_cursor;
 	char** playing_field = new char* [size_x];
 	char** mines_field = new char* [size_x];
@@ -189,20 +189,6 @@ public:
 				CheckOnEmptyCell(x - 1, y);
 			}
 		}
-		if (x > 0 && y > 0 && playing_field[x - 1][y - 1] == closed_sym) {
-			OpenCell(x - 1, y - 1);
-			if (mines_field[x - 1][y - 1] == empty_sym) {
-				CheckOnEmptyCell(x - 1, y - 1);
-			}
-		}
-		if (x > 0 && (y + 1) < size_y && playing_field[x - 1][y + 1] == closed_sym) {
-			OpenCell(x - 1, y + 1);
-			if (mines_field[x - 1][y + 1] == empty_sym) {
-				CheckOnEmptyCell(x - 1, y + 1);
-			}
-		}
-
-		///////////////////////////////
 		if (y > 0 && playing_field[x][y - 1] == closed_sym) {
 			OpenCell(x, y - 1);
 			if (mines_field[x][y - 1] == empty_sym) {
@@ -215,24 +201,10 @@ public:
 				CheckOnEmptyCell(x, y + 1);
 			}
 		}
-
-		//////////////////////
 		if ((x + 1) < size_x && playing_field[x + 1][y] == closed_sym) {
 			OpenCell(x + 1, y);
 			if (mines_field[x + 1][y] == empty_sym) {
 				CheckOnEmptyCell(x + 1, y);
-			}
-		}
-		if ((x + 1) < size_x && y > 0 && playing_field[x + 1][y - 1] == closed_sym) {
-			OpenCell(x + 1, y - 1);
-			if (mines_field[x + 1][y - 1] == empty_sym) {
-				CheckOnEmptyCell(x + 1, y - 1);
-			}
-		}
-		if ((x + 1) < size_x && (y + 1) < size_y && playing_field[x + 1][y + 1] == closed_sym) {
-			OpenCell(x + 1, y + 1);
-			if (mines_field[x + 1][y + 1] == empty_sym) {
-				CheckOnEmptyCell(x + 1, y + 1);
 			}
 		}
 	}
@@ -299,30 +271,37 @@ int main()
 	a.GetSym(cursor.Update('x'), cursor.Update('y'));
 	a.ChangeCursorPlace(cursor.Update('x'), cursor.Update('y'));
 
-	while (_getch() != 27) {
+	for (;;) {
 		a.SetSym(cursor.Update('x'), cursor.Update('y'));
 		int ch = _getch();
 		switch (ch) {
-		case (72):
+		case 'k':
+		case 72:
 			cursor.Up();
 			break;
 
-		case (75):
+		case 'h':
+		case 75:
 			cursor.Left();
 			break;
 
-		case (77):
+		case 'l':
+		case 77:
 			cursor.Right();
 			break;
 
-		case (80):
+		case 'j':
+		case 80:
 			cursor.Down();
 			break;
-
-		case (13):
+		case 'f':
+		case 13:
 			fail_case = a.OpenCell(cursor.Update('x'), cursor.Update('y'));
 			break;
+		case 27:
+			return 0;
 		}
+
 		a.GetSym(cursor.Update('x'), cursor.Update('y'));
 
 		if (fail_case == 1) {
