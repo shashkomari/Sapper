@@ -10,6 +10,7 @@ protected:
 	const char closed_sym = '.';
 	const char bomb_sym = '*';
 	const char empty_sym = ' ';
+	const char flag_sym = '+';
 	char sym_under_the_cursor;
 	char** playing_field = new char* [size_x];
 	char** mines_field = new char* [size_x];
@@ -169,7 +170,7 @@ public:
 	}
 
 	bool OpenCell(int x, int y) {
-		if (playing_field[x][y] == closed_sym) {
+		if (playing_field[x][y] == closed_sym || playing_field[x][y] == flag_sym) {
 			playing_field[x][y] = mines_field[x][y];
 			if (playing_field[x][y] == empty_sym) {
 				CheckOnEmptyCell(x, y);
@@ -216,6 +217,15 @@ public:
 					OpenCell(x, y);
 				}
 			}
+		}
+	}
+
+	void PutAFlag(int x, int y) {
+		if (playing_field[x][y] == closed_sym) {
+			playing_field[x][y] = flag_sym;
+		}
+		else if (playing_field[x][y] == flag_sym) {
+			playing_field[x][y] = closed_sym;
 		}
 	}
 };
@@ -294,10 +304,17 @@ int main()
 		case 80:
 			cursor.Down();
 			break;
+
 		case 'f':
 		case 13:
 			fail_case = a.OpenCell(cursor.Update('x'), cursor.Update('y'));
 			break;
+
+		case 'd':
+		case 47:
+			a.PutAFlag(cursor.Update('x'), cursor.Update('y'));
+			break;
+
 		case 27:
 			return 0;
 		}
