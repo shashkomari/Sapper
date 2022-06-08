@@ -11,6 +11,7 @@ protected:
 	const char bomb_sym = '*';
 	const char empty_sym = ' ';
 	const char flag_sym = '+';
+	const char cursor_sym = 'o';
 	char sym_under_the_cursor;
 	char** playing_field = new char* [size_x];
 	char** mines_field = new char* [size_x];
@@ -45,8 +46,8 @@ public:
 	void MapGeneration() {
 		// Generate bombs
 		for (int mines = number_of_mines; mines > 0;) {
-			int x = rand() % 10;
-			int y = rand() % 10;
+			int x = rand() % size_x;
+			int y = rand() % size_y;
 			if (mines_field[x][y] != bomb_sym) {
 				mines_field[x][y] = bomb_sym;
 				mines--;
@@ -157,7 +158,7 @@ public:
 	}
 
 	void ChangeCursorPlace(int x, int y) {
-		playing_field[x][y] = 'o';
+		playing_field[x][y] = cursor_sym;
 		Print();
 	}
 
@@ -202,12 +203,42 @@ public:
 				CheckOnEmptyCell(x, y + 1);
 			}
 		}
+		//diagonals
 		if ((x + 1) < size_x && playing_field[x + 1][y] == closed_sym) {
 			OpenCell(x + 1, y);
 			if (mines_field[x + 1][y] == empty_sym) {
 				CheckOnEmptyCell(x + 1, y);
 			}
 		}
+		if (x > 0 && y > 0 && playing_field[x - 1][y - 1] == closed_sym) {
+			OpenCell(x - 1, y - 1);
+			if (mines_field[x - 1][y - 1] == empty_sym) {
+				CheckOnEmptyCell(x - 1, y - 1);
+				
+			}
+		}
+		if (x > 0 && (y + 1) < size_y && playing_field[x - 1][y + 1] == closed_sym) {
+			OpenCell(x - 1, y + 1);
+			if (mines_field[x - 1][y + 1] == empty_sym) {
+				CheckOnEmptyCell(x - 1, y + 1);
+				
+			}
+		}
+		if ((x + 1) < size_x && y > 0 && playing_field[x + 1][y - 1] == closed_sym) {
+			OpenCell(x + 1, y - 1);
+			if (mines_field[x + 1][y - 1] == empty_sym) {
+				CheckOnEmptyCell(x + 1, y - 1);
+				
+			}
+		}
+		if ((x + 1) < size_x && (y + 1) < size_y && playing_field[x + 1][y + 1] == closed_sym) {
+			OpenCell(x + 1, y + 1);
+			if (mines_field[x + 1][y + 1] == empty_sym) {
+				CheckOnEmptyCell(x + 1, y + 1);
+				
+			}
+		}
+
 	}
 
 	void OpenAllBomb() {
@@ -226,6 +257,33 @@ public:
 		}
 		else if (playing_field[x][y] == flag_sym) {
 			playing_field[x][y] = closed_sym;
+		}
+	}
+
+	bool CheckOnWin() {
+		int counter = 0;
+		for (int x = 0; x < size_x; x++) {
+			for (int y = 0; y < size_y; y++) {
+				if ((playing_field[x][y] == flag_sym && mines_field[x][y] == bomb_sym) || (playing_field[x][y] == cursor_sym && mines_field[x][y] == bomb_sym) || (playing_field[x][y] == closed_sym))
+				{
+					counter++;
+				}
+			}
+		}
+		if (counter == number_of_mines) {
+			return 1;
+		}
+		return 0;
+	}
+
+	void OpenAllCell() {
+		for (int x = 0; x < size_x; x++) {
+			for (int y = 0; y < size_y; y++) {
+				if (playing_field[x][y] == closed_sym)
+				{
+					OpenCell(x, y);
+				}
+			}
 		}
 	}
 };
@@ -276,6 +334,7 @@ int main()
 {
 	srand(time(NULL));
 	bool fail_case = 0;
+	bool win_case = 0;
 	Field a;
 	Cursor cursor;
 	a.GetSym(cursor.Update('x'), cursor.Update('y'));
@@ -318,13 +377,19 @@ int main()
 		case 27:
 			return 0;
 		}
-
+		win_case = a.CheckOnWin();
 		a.GetSym(cursor.Update('x'), cursor.Update('y'));
 
 		if (fail_case == 1) {
 			a.SetSym(cursor.Update('x'), cursor.Update('y'));
 			a.Print();
 			cout << "\n\t\t\t\t\t~~~U R LOSER~~~" << endl;
+			break;
+		}
+		if (win_case == 1) {
+			a.OpenAllCell();
+			a.Print();
+			cout << "\n\t\t\t\t\t~~~U R WINNER~~~" << endl;
 			break;
 		}
 
