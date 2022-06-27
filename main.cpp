@@ -1,11 +1,12 @@
 #include <iostream>
 #include <ctime>
 #include <conio.h>
+#include <array>
 using namespace std;
 
 class Field {
 protected:
-	const int size_x = 10, size_y = 10;
+	static const int size_x = 10, size_y = 10;
 	const int number_of_mines = 10;
 	const char closed_sym = '.';
 	const char bomb_sym = '*';
@@ -13,34 +14,19 @@ protected:
 	const char flag_sym = '+';
 	const char cursor_sym = 'o';
 	char sym_under_the_cursor;
-	char** playing_field = new char* [size_x];
-	char** mines_field = new char* [size_x];
+	array<array<char, size_y>, size_x> playing_field;
+	array<array<char, size_y>, size_x> mines_field;
 	int bomb_counter = 0;
 	bool fail_case = 0;
 
 public:
 	Field() {
-		for (int i = 0; i < size_x; i++) {
-			playing_field[i] = new char[size_y];
-		}
-		for (int i = 0; i < size_x; i++) {
-			mines_field[i] = new char[size_y];
-		}
 		EmptyField(mines_field);
 		MapGeneration();
 		EmptyField(playing_field);
 		Print();
 	}
 	~Field() {
-		for (int i = 0; i < size_x; i++) {
-			delete[] playing_field[i];
-		}
-		delete[] playing_field;
-
-		for (int i = 0; i < size_x; i++) {
-			delete[] mines_field[i];
-		}
-		delete[] mines_field;
 	}
 
 	void MapGeneration() {
@@ -48,8 +34,8 @@ public:
 		for (int mines = number_of_mines; mines > 0;) {
 			int x = rand() % size_x;
 			int y = rand() % size_y;
-			if (mines_field[x][y] != bomb_sym) {
-				mines_field[x][y] = bomb_sym;
+			if (mines_field.at(x).at(y) != bomb_sym) {
+				mines_field.at(x).at(y) = bomb_sym;
 				mines--;
 			}
 		}
@@ -59,15 +45,15 @@ public:
 		{
 			for (int j = 0; j < size_y; j++)
 			{
-				if (mines_field[i][j] != bomb_sym)
+				if (mines_field.at(i).at(j) != bomb_sym)
 				{
 					int num_of_bombs = CalculateBomb(i, j);
 					if (num_of_bombs == 0) {
-						mines_field[i][j] = empty_sym;
+						mines_field.at(i).at(j) = empty_sym;
 					}
 					else
 					{
-						mines_field[i][j] = IntToChar(num_of_bombs);
+						mines_field.at(i).at(j) = IntToChar(num_of_bombs);
 					}
 				}
 			}
@@ -87,18 +73,18 @@ public:
 		{
 			if (j > 0)
 			{
-				if (mines_field[i - 1][j - 1] == bomb_sym)
+				if (mines_field.at(i - 1).at(j - 1) == bomb_sym)
 				{
 					num_of_bombs++;
 				}
 			}
-			if (mines_field[i - 1][j] == bomb_sym)
+			if (mines_field.at(i - 1).at(j) == bomb_sym)
 			{
 				num_of_bombs++;
 			}
 			if (j < (size_y - 1))
 			{
-				if (mines_field[i - 1][j + 1] == bomb_sym)
+				if (mines_field.at(i - 1).at(j + 1) == bomb_sym)
 				{
 					num_of_bombs++;
 				}
@@ -108,18 +94,18 @@ public:
 		{
 			if (j > 0)
 			{
-				if (mines_field[i + 1][j - 1] == bomb_sym)
+				if (mines_field.at(i + 1).at(j - 1) == bomb_sym)
 				{
 					num_of_bombs++;
 				}
 			}
-			if (mines_field[i + 1][j] == bomb_sym)
+			if (mines_field.at(i + 1).at(j) == bomb_sym)
 			{
 				num_of_bombs++;
 			}
 			if (j < (size_y - 1))
 			{
-				if (mines_field[i + 1][j + 1] == bomb_sym)
+				if (mines_field.at(i + 1).at(j + 1) == bomb_sym)
 				{
 					num_of_bombs++;
 				}
@@ -127,22 +113,22 @@ public:
 		}
 		if (j > 0)
 		{
-			if (mines_field[i][j - 1] == bomb_sym) {
+			if (mines_field.at(i).at(j - 1) == bomb_sym) {
 				num_of_bombs++;
 			}
 		}
 		if (j < (size_y - 1)) {
-			if (mines_field[i][j + 1] == bomb_sym) {
+			if (mines_field.at(i).at(j + 1) == bomb_sym) {
 				num_of_bombs++;
 			}
 		}
 		return num_of_bombs;
 	}
 
-	void EmptyField(char** arr) {
-		for (int i = 0; i < size_x; i++) {
-			for (int j = 0; j < size_y; j++) {
-				arr[i][j] = closed_sym;
+	void EmptyField(array<array<char, size_y>, size_x>& arr) {
+		for (int i = 0; i < arr.size(); i++) {
+			for (int j = 0; j < arr.at(i).size(); j++) {
+				arr.at(i).at(j) = closed_sym;
 			}
 		}
 	}
@@ -151,32 +137,32 @@ public:
 		system("cls");
 		for (int i = 0; i < size_x; i++) {
 			for (int j = 0; j < size_y; j++) {
-				cout << playing_field[i][j] << ' ';
+				cout << playing_field.at(i).at(j) << ' ';
 			}
 			cout << endl;
 		}
 	}
 
 	void ChangeCursorPlace(int x, int y) {
-		playing_field[x][y] = cursor_sym;
+		playing_field.at(x).at(y) = cursor_sym;
 		Print();
 	}
 
 	void SetSym(int x, int y) {
-		playing_field[x][y] = sym_under_the_cursor;
+		playing_field.at(x).at(y) = sym_under_the_cursor;
 	}
 
 	void GetSym(int x, int y) {
-		sym_under_the_cursor = playing_field[x][y];
+		sym_under_the_cursor = playing_field.at(x).at(y);
 	}
 
 	bool OpenCell(int x, int y) {
-		if (playing_field[x][y] == closed_sym || playing_field[x][y] == flag_sym) {
-			playing_field[x][y] = mines_field[x][y];
-			if (playing_field[x][y] == empty_sym) {
+		if (playing_field.at(x).at(y) == closed_sym || playing_field.at(x).at(y) == flag_sym) {
+			playing_field.at(x).at(y) = mines_field.at(x).at(y);
+			if (playing_field.at(x).at(y) == empty_sym) {
 				CheckOnEmptyCell(x, y);
 			}
-			if (playing_field[x][y] == bomb_sym) {
+			if (playing_field.at(x).at(y) == bomb_sym) {
 				OpenAllBomb();
 				fail_case = 1;
 			}
@@ -185,66 +171,61 @@ public:
 	}
 
 	void CheckOnEmptyCell(int x, int y) {
-		if (x > 0 && playing_field[x - 1][y] == closed_sym) {
+		if (x > 0 && playing_field.at(x - 1).at(y) == closed_sym) {
 			OpenCell(x - 1, y);
-			if (mines_field[x - 1][y] == empty_sym) {
+			if (mines_field.at(x - 1).at(y) == empty_sym) {
 				CheckOnEmptyCell(x - 1, y);
 			}
 		}
-		if (y > 0 && playing_field[x][y - 1] == closed_sym) {
+		if (y > 0 && playing_field.at(x).at(y - 1) == closed_sym) {
 			OpenCell(x, y - 1);
-			if (mines_field[x][y - 1] == empty_sym) {
+			if (mines_field.at(x).at(y - 1) == empty_sym) {
 				CheckOnEmptyCell(x, y - 1);
 			}
 		}
-		if ((y + 1) < size_y && playing_field[x][y + 1] == closed_sym) {
+		if ((y + 1) < size_y && playing_field.at(x).at(y + 1) == closed_sym) {
 			OpenCell(x, y + 1);
-			if (mines_field[x][y + 1] == empty_sym) {
+			if (mines_field.at(x).at(y + 1) == empty_sym) {
 				CheckOnEmptyCell(x, y + 1);
 			}
 		}
 		//diagonals
-		if ((x + 1) < size_x && playing_field[x + 1][y] == closed_sym) {
+		if ((x + 1) < size_x && playing_field.at(x + 1).at(y) == closed_sym) {
 			OpenCell(x + 1, y);
-			if (mines_field[x + 1][y] == empty_sym) {
+			if (mines_field.at(x + 1).at(y) == empty_sym) {
 				CheckOnEmptyCell(x + 1, y);
 			}
 		}
-		if (x > 0 && y > 0 && playing_field[x - 1][y - 1] == closed_sym) {
+		if (x > 0 && y > 0 && playing_field.at(x - 1).at(y - 1) == closed_sym) {
 			OpenCell(x - 1, y - 1);
-			if (mines_field[x - 1][y - 1] == empty_sym) {
+			if (mines_field.at(x - 1).at(y - 1) == empty_sym) {
 				CheckOnEmptyCell(x - 1, y - 1);
-				
 			}
 		}
-		if (x > 0 && (y + 1) < size_y && playing_field[x - 1][y + 1] == closed_sym) {
+		if (x > 0 && (y + 1) < size_y && playing_field.at(x - 1).at(y + 1) == closed_sym) {
 			OpenCell(x - 1, y + 1);
-			if (mines_field[x - 1][y + 1] == empty_sym) {
+			if (mines_field.at(x - 1).at(y + 1) == empty_sym) {
 				CheckOnEmptyCell(x - 1, y + 1);
-				
 			}
 		}
-		if ((x + 1) < size_x && y > 0 && playing_field[x + 1][y - 1] == closed_sym) {
+		if ((x + 1) < size_x && y > 0 && playing_field.at(x + 1).at(y - 1) == closed_sym) {
 			OpenCell(x + 1, y - 1);
-			if (mines_field[x + 1][y - 1] == empty_sym) {
+			if (mines_field.at(x + 1).at(y - 1) == empty_sym) {
 				CheckOnEmptyCell(x + 1, y - 1);
-				
 			}
 		}
-		if ((x + 1) < size_x && (y + 1) < size_y && playing_field[x + 1][y + 1] == closed_sym) {
+		if ((x + 1) < size_x && (y + 1) < size_y && playing_field.at(x + 1).at(y + 1) == closed_sym) {
 			OpenCell(x + 1, y + 1);
-			if (mines_field[x + 1][y + 1] == empty_sym) {
+			if (mines_field.at(x + 1).at(y + 1) == empty_sym) {
 				CheckOnEmptyCell(x + 1, y + 1);
-				
 			}
 		}
-
 	}
 
 	void OpenAllBomb() {
 		for (int x = 0; x < size_x; x++) {
 			for (int y = 0; y < size_y; y++) {
-				if (mines_field[x][y] == bomb_sym) {
+				if (mines_field.at(x).at(y) == bomb_sym) {
 					OpenCell(x, y);
 				}
 			}
@@ -252,11 +233,11 @@ public:
 	}
 
 	void PutAFlag(int x, int y) {
-		if (playing_field[x][y] == closed_sym) {
-			playing_field[x][y] = flag_sym;
+		if (playing_field.at(x).at(y) == closed_sym) {
+			playing_field.at(x).at(y) = flag_sym;
 		}
-		else if (playing_field[x][y] == flag_sym) {
-			playing_field[x][y] = closed_sym;
+		else if (playing_field.at(x).at(y) == flag_sym) {
+			playing_field.at(x).at(y) = closed_sym;
 		}
 	}
 
@@ -264,7 +245,7 @@ public:
 		int counter = 0;
 		for (int x = 0; x < size_x; x++) {
 			for (int y = 0; y < size_y; y++) {
-				if ((playing_field[x][y] == flag_sym && mines_field[x][y] == bomb_sym) || (playing_field[x][y] == cursor_sym && mines_field[x][y] == bomb_sym) || (playing_field[x][y] == closed_sym))
+				if ((playing_field.at(x).at(y) == flag_sym && mines_field.at(x).at(y) == bomb_sym) || (playing_field.at(x).at(y) == cursor_sym && mines_field.at(x).at(y) == bomb_sym) || (playing_field.at(x).at(y) == closed_sym))
 				{
 					counter++;
 				}
@@ -279,7 +260,7 @@ public:
 	void OpenAllCell() {
 		for (int x = 0; x < size_x; x++) {
 			for (int y = 0; y < size_y; y++) {
-				if (playing_field[x][y] == closed_sym)
+				if (playing_field.at(x).at(y) == closed_sym)
 				{
 					OpenCell(x, y);
 				}
